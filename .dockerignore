@@ -1,0 +1,4 @@
+node_modules/
+.env
+.sampleJson.json
+yarn-error.log

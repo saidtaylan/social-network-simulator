@@ -437,6 +437,21 @@
               }
             }
           }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user not found"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -504,6 +519,36 @@
               }
             }
           }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user to follow not found"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "401": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "you may not follow yourself"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -555,7 +600,7 @@
             }
           }
         },
-        "404": {
+        "409": {
           "content": {
             "application/json": {
               "schema": {
@@ -564,6 +609,36 @@
                   "message": {
                     "type": "String",
                     "example": "not followed already"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user to unfollow not found"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "401": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "you may not unfollow yourself"
                   }
                 }
               }
@@ -636,6 +711,21 @@
               }
             }
           }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "post to like not found"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -687,7 +777,7 @@
             }
           }
         },
-        "404": {
+        "409": {
           "content": {
             "application/json": {
               "schema": {
@@ -696,6 +786,21 @@
                   "message": {
                     "type": "String",
                     "example": "not liked already"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "post to unlike not found"
                   }
                 }
               }

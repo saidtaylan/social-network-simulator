@@ -110,9 +110,13 @@ const createPost = async (req, res, next) => {
 const feed = async (req, res, next) => {
   try {
     const posts = await feedService(req.user.id);
-    return res.status(httpStatus.OK).send({
-      data: posts,
-    });
+    if (!posts.status) {
+      return res.status(httpStatus.OK).send({
+        data: posts,
+      });
+    }
+    // servisten bir hata mesajı döndürülür ve next ile hata fırlatılır
+    next(posts);
   } catch (error) {
     console.error("FEED ERROR", error);
     next({ ...error, message: "an error occured fetching the feed" });
@@ -121,18 +125,23 @@ const feed = async (req, res, next) => {
 
 const follow = async (req, res, next) => {
   try {
+    if (req.user.id === req.body.userId) {
+      return next({
+        status: httpStatus.UNAUTHORIZED,
+        message: "you may not follow yourself",
+      });
+    }
     const user = await selectUser({ _id: req.user.id });
-    if (user) {
-      if (
-        user.following.findIndex((f) => f.toString() === req.body.userId) > -1
-      ) {
-        return next({
-          status: httpStatus.CONFLICT,
-          message: "you followed already",
-        });
-      } else {
-        const followedUser = await selectUser({ _id: req.body.userId });
-        console.log("followedUser", followedUser);
+    if (
+      user.following.findIndex((f) => f.toString() === req.body.userId) > -1
+    ) {
+      return next({
+        status: httpStatus.CONFLICT,
+        message: "you followed already",
+      });
+    } else {
+      const followedUser = await selectUser({ _id: req.body.userId });
+      if (followedUser) {
         user.following.push(new ObjectId(req.body.userId));
         followedUser.follower.push(new ObjectId(req.user.id));
         await user.save();
@@ -141,6 +150,7 @@ const follow = async (req, res, next) => {
           .status(httpStatus.OK)
           .send({ message: "followed successfully" });
       }
+      return next({ status: 404, message: "user to follow not found" });
     }
   } catch (error) {
     console.error("USER FOLLOW ERROR", error);
@@ -150,26 +160,35 @@ const follow = async (req, res, next) => {
 
 const unfollow = async (req, res, next) => {
   try {
+    if (req.user.id === req.body.userId) {
+      return next({
+        status: httpStatus.UNAUTHORIZED,
+        message: "you may not unfollow yourself",
+      });
+    }
     userIdToUnfollow = req.body.userId;
     const user = await selectUser({ _id: req.user.id });
-    if (user) {
-      const followIndex = user.following.findIndex(
-        (f) => f.toString() === userIdToUnfollow
-      );
-      if (followIndex === -1) {
-        return next({
-          status: httpStatus.NOT_FOUND,
-          message: "not followed already",
-        });
-      } else {
-        const unfollowedUser = await selectUser({ _id: userIdToUnfollow });
+    const followIndex = user.following.findIndex(
+      (f) => f.toString() === userIdToUnfollow
+    );
+    if (followIndex === -1) {
+      return next({
+        status: httpStatus.CONFLICT,
+        message: "not followed already",
+      });
+    } else {
+      const unfollowedUser = await selectUser({ _id: userIdToUnfollow });
+      if (unfollowedUser) {
         user.following.splice(followIndex);
         unfollowedUser.follower = unfollowedUser.follower.filter(
           (follower) => follower._id !== req.user.id
         );
-        user.save();
-        res.status(httpStatus.OK).send({ message: "unfollowed successfully" });
+        await user.save();
+        return res
+          .status(httpStatus.OK)
+          .send({ message: "unfollowed successfully" });
       }
+      return next({ status: 404, message: "user to unfollow not found" });
     }
   } catch (error) {
     console.error("USER UNFOLLOW ERROR", error);
@@ -185,13 +204,17 @@ const like = async (req, res, next) => {
       if (
         post.likes.findIndex((like) => like.toString() === req.user.id) > -1
       ) {
-        return next({ status: 409, message: "liked already" });
+        return next({
+          status: httpStatus.CONFLICT,
+          message: "liked already",
+        });
       } else {
         post.likes.push(new ObjectId(req.user.id));
-        post.save();
+        await post.save();
         return res.status(200).send({ message: "liked successfully" });
       }
     }
+    return next({ status: 404, message: "post to like not found" });
   } catch (error) {
     console.error("POST LIKE ERROR", error);
     next({ ...error, message: "the post could not like" });
@@ -207,13 +230,17 @@ const unlike = async (req, res, next) => {
         (like) => like.toString() === req.user.id
       );
       if (likeIndex === -1) {
-        return next({ status: 404, message: "not liked already" });
+        return next({
+          status: httpStatus.CONFLICT,
+          message: "not liked already",
+        });
       } else {
         post.likes.splice(likeIndex);
-        post.save();
+        await post.save();
         return res.status(200).send({ message: "unliked successfully" });
       }
     }
+    return next({ status: 404, message: "post to unlike not found" });
   } catch (error) {
     console.error("POST UNLIKE ERROR", error);
     next({ ...error, message: "the post could not unlike" });
@@ -231,15 +258,16 @@ const retweet = async (req, res, next) => {
       });
       if (retweetedPost) {
         post.retweet.push(new ObjectId(req.user.id));
-        post.save();
+        await post.save();
       }
-      res.status(httpStatus.CREATED).send({
+      return res.status(httpStatus.CREATED).send({
         message: "the post retweeted",
         data: {
           retweetedPostId: retweetedPost._id,
         },
       });
     }
+    return next({ status: 404, message: "the post to retweet not found" });
   } catch (error) {
     console.error("POST RETWEET ERROR", error);
     next({ ...error, message: "the post could not retweet" });
@@ -250,9 +278,9 @@ const removePost = async (req, res, next) => {
   try {
     const post = await selectPost({ _id: req.body.postId });
     if (post) {
+      // you may not delete you dont own
       if (post.user.toString() === req.user.id) {
         const deletedPost = await deletePost(req.body.postId);
-        console.log("deletedPost", deletedPost);
         if (deletedPost.modifiedCount > 0) {
           return res.status(httpStatus.OK).send({
             message: "the post deleted successfully",

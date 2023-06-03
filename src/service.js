@@ -39,26 +39,27 @@ const feedService = async (userId) => {
   })
     .populate("following", "username")
     .lean();
+  if (user) {
+    const posts = await Post.find(
+      { user: { $in: user.following } },
+      { content: 1, _id: 0 }
+    ).populate({
+      path: "user",
+      select: "_id",
+    });
 
-  const followingIds = user.following.map((f) => f._id);
-  const posts = await Post.find(
-    { user: { $in: followingIds } },
-    { content: 1, _id: 0 }
-  ).populate({
-    path: "user",
-    select: "_id",
-  });
-
-  const result = {
-    username: user.username,
-    following: user.following.map((user) => ({
+    const result = {
       username: user.username,
-      posts: posts.map((post) => {
-        return { content: post.content, postId: post.user._id };
-      }),
-    })),
-  };
-  return result;
+      following: user.following.map((user) => ({
+        username: user.username,
+        posts: posts.map((post) => {
+          return { content: post.content, postId: post.user._id };
+        }),
+      })),
+    };
+    return result;
+  }
+  return { status: 404, message: "user not found" };
 };
 
 module.exports = {

@@ -4,8 +4,11 @@ const validate = (schema) => (req, res, next) => {
     params: req.params,
   });
   if (error) {
-    // joi, içinde obje şeklinde hataların bulunduğu bir details dizisi geri döner. Buradaki hata mesajlarını alıp bir diziye atıyoruz
-    //error.details = [{message: 'name bust be a string'}]
+    /*
+    * joi, içinde obje şeklinde hataların bulunduğu bir details dizisi geri döner.
+    * Buradaki hatamesajlarını alıp bir diziye atıyoruz
+    * error.details = [{message: 'name bust be a string'}]
+    */
     const errorMessage = error.details?.map((item) => item.message);
     res.status(400).send({ message: errorMessage });
     return;

@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-//const logger = require("../logs/Users");
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
@@ -12,13 +11,13 @@ const userSchema = new mongoose.Schema(
     following: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        ref: 'user',
       },
     ],
     follower: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        ref: 'user',
       },
     ],
     deleted_at: Date,
@@ -26,7 +25,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model('user', userSchema);

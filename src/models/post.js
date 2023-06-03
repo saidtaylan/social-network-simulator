@@ -1,24 +1,23 @@
-const mongoose = require("mongoose");
-//const logger = require("../logs/Users");
+const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema(
   {
     content: String,
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
+      ref: 'user',
     },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        ref: 'user',
       },
     ],
 
     retweet: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        ref: 'user',
       },
     ],
 
@@ -27,7 +26,7 @@ const postSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
-module.exports = mongoose.model("post", postSchema);
+module.exports = mongoose.model('post', postSchema);

@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-mongoose.connection.once("open", () => {
-  console.log("MongoDB bağlantı başarılı");
+mongoose.connection.once('open', () => {
+  console.log('MongoDB bağlantı başarılı');
 });
 
 const connectDB = async () => {
@@ -10,7 +10,7 @@ const connectDB = async () => {
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    }
+    },
   );
 };
 

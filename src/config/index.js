@@ -1,6 +1,6 @@
-const appConfig = require("./app.js");
-const db = require("./db.js");
-const initSwagger = require("./swagger.js");
+const appConfig = require('./app');
+const db = require('./db');
+const initSwagger = require('./swagger');
 
 module.exports = async (app) => {
   appConfig();

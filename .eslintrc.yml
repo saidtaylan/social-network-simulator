@@ -11,5 +11,5 @@ rules:
     - error
     - allowIndentationTabs: true
   no-console: off
-  consistent-return:
-    - treatUndefinedAsUnspecified
+  consistent-return: 0
+  no-unused-vars: 0

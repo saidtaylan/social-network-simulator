@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 
 const {
   createUser,
@@ -12,32 +12,32 @@ const {
   unlike,
   retweet,
   removePost,
-} = require("./controller.js");
+} = require('./controller');
 
-const authenticate = require("./middlewares/authentication.js");
-const validate = require("./middlewares/validation.js");
+const authenticate = require('./middlewares/authentication');
+const validate = require('./middlewares/validation');
 
-const validator = require("./validations/index.js");
+const validator = require('./validations/index');
 
 const router = express.Router();
 
-router.route("/users").post(validate(validator.createUser), createUser);
+router.route('/users').post(validate(validator.createUser), createUser);
 router
-  .route("/users/:username")
+  .route('/users/:username')
   .get(validate(validator.getUser), viewUserByUsername);
-router.route("/login").post(validate(validator.login), login);
+router.route('/login').post(validate(validator.login), login);
 
 router
-  .route("/posts")
+  .route('/posts')
   .post(authenticate, validate(validator.createPost), createPost);
-router.route("/posts").delete(authenticate, removePost);
-router.route("/retweet").post(authenticate, retweet);
+router.route('/posts').delete(authenticate, removePost);
+router.route('/retweet').post(authenticate, retweet);
 
-router.route("/feed").get(authenticate, feed);
-router.route("/follow").post(authenticate, follow);
-router.route("/follow").delete(authenticate, unfollow);
+router.route('/feed').get(authenticate, feed);
+router.route('/follow').post(authenticate, follow);
+router.route('/follow').delete(authenticate, unfollow);
 
-router.route("/likes").post(authenticate, like);
-router.route("/likes").delete(authenticate, unlike);
+router.route('/likes').post(authenticate, like);
+router.route('/likes').delete(authenticate, unlike);
 
 module.exports = router;

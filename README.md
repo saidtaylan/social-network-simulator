@@ -7,3 +7,10 @@ _Projenin dökümantasyonu 'swagger' kullanılarak yapılmıştır. '/api-docs' 
 > Projede özellikle '/feed' endpointinin performansı 'mongo'nun 'aggregate' fonksiyonu ile artırılabilir.
 
 > Az sayıda endpoint mevcut olduğu için router'ları ayırmaya ihtiyaç görülmemiştir.
+
+> Projeyi başlatmak için:
+
+```
+docker compose up
+```
+Proje başladıktan sonra **3000** portundan ulaşabilirsiniz.

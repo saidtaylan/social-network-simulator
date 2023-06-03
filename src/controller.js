@@ -1,24 +1,24 @@
+const httpStatus = require('http-status');
+const { ObjectId } = require('mongoose').Types;
+
 const {
   insertUser,
-  selectUsers,
   selectUser,
   feedService,
   insertPost,
   selectPost,
   deletePost,
-} = require('./service.js');
-const httpStatus = require('http-status');
+} = require('./service');
+
 const {
   passwordToHash,
   generateAccessToken,
   generateRefreshToken,
-} = require('./utils/helpers.js');
-
-const ObjectId = require('mongoose').Types.ObjectId;
+} = require('./utils/helpers');
 
 const viewUserByUsername = async (req, res, next) => {
   try {
-    let user = await selectUser({ username: req.params.username });
+    const user = await selectUser({ username: req.params.username });
     if (user) {
       return res.status(httpStatus.OK).send({
         data: {
@@ -37,7 +37,7 @@ const viewUserByUsername = async (req, res, next) => {
 
 const createUser = async (req, res, next) => {
   try {
-    let user = await selectUser({ email: req.body.email });
+    const user = await selectUser({ email: req.body.email });
     if (user) {
       next({ status: 409, message: 'user exist already' });
     }
@@ -53,7 +53,7 @@ const createUser = async (req, res, next) => {
         data: {
           email: newUser.email,
           username: newUser.username,
-          id: newUser._id,
+          id: newUser.id,
         },
       });
     }
@@ -70,13 +70,13 @@ const login = async (req, res, next) => {
       return res.status(httpStatus.OK).send({
         message: 'login successful',
         data: {
-          id: user._id.toString(),
+          id: user.id.toString(),
           access_token: generateAccessToken({
-            id: user._id.toString(),
+            id: user.id.toString(),
             email: user.email,
           }),
           refresh_token: generateRefreshToken({
-            id: user._id.toString(),
+            id: user.id.toString(),
             email: user.email,
           }),
         },
@@ -98,7 +98,7 @@ const createPost = async (req, res, next) => {
     if (newPost) {
       return res.status(httpStatus.CREATED).send({
         message: 'the post created',
-        data: { postId: newPost._id },
+        data: { postId: newPost.id },
       });
     }
   } catch (error) {
@@ -173,20 +173,17 @@ const unfollow = async (req, res, next) => {
         status: httpStatus.CONFLICT,
         message: 'not followed already',
       });
-    } else {
-      const unfollowedUser = await selectUser({ _id: userIdToUnfollow });
-      if (unfollowedUser) {
-        user.following.splice(followIndex);
-        unfollowedUser.follower = unfollowedUser.follower.filter(
-          (follower) => follower._id !== req.user.id,
-        );
-        await user.save();
-        return res
-          .status(httpStatus.OK)
-          .send({ message: 'unfollowed successfully' });
-      }
-      return next({ status: 404, message: 'user to unfollow not found' });
     }
+    const unfollowedUser = await selectUser({ _id: userIdToUnfollow });
+    if (unfollowedUser) {
+      user.following.splice(followIndex);
+      unfollowedUser.follower = unfollowedUser.follower.filter(
+        (follower) => follower.id !== req.user.id,
+      );
+      await user.save();
+      return res.status(httpStatus.OK).send({ message: 'unfollowed successfully' });
+    }
+    return next({ status: 404, message: 'user to unfollow not found' });
   } catch (error) {
     console.error('USER UNFOLLOW ERROR', error);
     return next({ ...error, message: 'the user could not unfollow' });
@@ -205,11 +202,10 @@ const like = async (req, res, next) => {
           status: httpStatus.CONFLICT,
           message: 'liked already',
         });
-      } else {
-        post.likes.push(new ObjectId(req.user.id));
-        await post.save();
-        return res.status(200).send({ message: 'liked successfully' });
       }
+      post.likes.push(new ObjectId(req.user.id));
+      await post.save();
+      return res.status(200).send({ message: 'liked successfully' });
     }
     return next({ status: 404, message: 'post to like not found' });
   } catch (error) {
@@ -224,18 +220,17 @@ const unlike = async (req, res, next) => {
     const post = await selectPost({ _id: postIdToUnlike });
     if (post) {
       const likeIndex = post.likes.findIndex(
-        (like) => like.toString() === req.user.id
+        (l) => l.toString() === req.user.id,
       );
       if (likeIndex === -1) {
         return next({
           status: httpStatus.CONFLICT,
           message: 'not liked already',
         });
-      } else {
-        post.likes.splice(likeIndex);
-        await post.save();
-        return res.status(200).send({ message: 'unliked successfully' });
       }
+      post.likes.splice(likeIndex);
+      await post.save();
+      return res.status(200).send({ message: 'unliked successfully' });
     }
     return next({ status: 404, message: 'post to unlike not found' });
   } catch (error) {
@@ -260,7 +255,7 @@ const retweet = async (req, res, next) => {
       return res.status(httpStatus.CREATED).send({
         message: 'the post retweeted',
         data: {
-          retweetedPostId: retweetedPost._id,
+          retweetedPostId: retweetedPost.id,
         },
       });
     }

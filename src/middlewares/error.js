@@ -1,4 +1,4 @@
-const errorHandler = (err, req, res) => {
+const errorHandler = (err, req, res, next) => {
   console.log('Middleware Error Handling');
 
   const errStatus = err.status || 500;

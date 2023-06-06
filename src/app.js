@@ -1,10 +1,12 @@
 const express = require('express');
 const helmet = require('helmet');
-/* const config = require('./config');
-const loaders = require('./loaders'); */
-const routes = require('./routes');
+const Controller = require('./controller');
 const config = require('./config/index');
 const errorHandler = require('./middlewares/error');
+const Service = require('./service');
+const Authentication = require('./middlewares/authentication');
+const Validation = require('./middlewares/validation');
+const ErrorHandler = require('./middlewares/error');
 
 const app = express();
 
@@ -14,6 +16,13 @@ app.use(express.json());
 app.use(helmet());
 
 app.listen(process.env.APP_PORT, () => {
-  app.use('/', routes);
-  app.use(errorHandler);
+  const service = new Service();
+  const middlewares = {
+    authentication: new Authentication(),
+    validation: new Validation(),
+    errorHandler: new ErrorHandler(),
+  };
+  const controller = new Controller(service, middlewares.authentication, middlewares.validation);
+  app.use('/', controller.setRouter());
+  app.use(middlewares.errorHandler.handle);
 });

@@ -1,4 +1,4 @@
-const express = require('express');
+/* const express = require('express');
 
 const {
   createUser,
@@ -14,22 +14,13 @@ const {
   removePost,
 } = require('./controller');
 
-const authenticate = require('./middlewares/authentication');
-const validate = require('./middlewares/validation');
-
-const validator = require('./validations/index');
-
 const router = express.Router();
 
 router.route('/users').post(validate(validator.createUser), createUser);
-router
-  .route('/users/:username')
-  .get(validate(validator.getUser), viewUserByUsername);
+router.route('/users/:username').get(validate(validator.getUser), viewUserByUsername);
 router.route('/login').post(validate(validator.login), login);
 
-router
-  .route('/posts')
-  .post(authenticate, validate(validator.createPost), createPost);
+router.route('/posts').post(authenticate, validate(validator.createPost), createPost);
 router.route('/posts').delete(authenticate, removePost);
 router.route('/retweet').post(authenticate, retweet);
 
@@ -41,3 +32,4 @@ router.route('/likes').post(authenticate, like);
 router.route('/likes').delete(authenticate, unlike);
 
 module.exports = router;
+ */

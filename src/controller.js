@@ -1,14 +1,11 @@
 const httpStatus = require('http-status');
 const { ObjectId } = require('mongoose').Types;
 const { Router } = require('express');
+const { Transform, pipeline } = require('stream');
 
 const validations = require('./validations/index');
 
-const {
-  passwordToHash,
-  generateAccessToken,
-  generateRefreshToken,
-} = require('./utils/helpers');
+const { passwordToHash, generateAccessToken, generateRefreshToken } = require('./utils/helpers');
 
 class Controller {
   constructor(service, authentication, validator) {
@@ -19,18 +16,17 @@ class Controller {
 
   setRouter() {
     this.router = Router();
+
+    this.router.route('/users').get(this.viewUsers.bind(this));
+
     this.router
       .route('/users')
-      .post(this.validator.validate(validations.createUser), this.createUser);
+      .post(this.validator.validate(validations.createUser), this.createUser.bind(this));
     this.router
       .route('/users/:username')
-      .get(
-        this.validator.validate(validations.getUser),
-        this.viewUserByUsername,
-      );
-    this.router
-      .route('/login')
-      .post(this.validator.validate(validations.login), this.login);
+      .get(this.validator.validate(validations.getUser), this.viewUserByUsername);
+    this.router.route('/login').post(this.validator.validate(validations.login), this.login);
+
     this.router
       .route('/posts')
       .post(
@@ -38,28 +34,29 @@ class Controller {
         this.validator.validate(validations.createPost),
         this.createPost,
       );
-    this.router
-      .route('/posts')
-      .delete(this.authentication.authenticate, this.removePost);
-    this.router
-      .route('/retweet')
-      .post(this.authentication.authenticate, this.retweet);
+
+    this.router.route('/posts').delete(this.authentication.authenticate, this.removePost);
+    this.router.route('/retweet').post(this.authentication.authenticate, this.retweet);
 
     this.router.route('/feed').get(this.authentication.authenticate, this.feed);
-    this.router
-      .route('/follow')
-      .post(this.authentication.authenticate, this.follow);
-    this.router
-      .route('/follow')
-      .delete(this.authentication.authenticate, this.unfollow);
+    this.router.route('/follow').post(this.authentication.authenticate, this.follow);
+    this.router.route('/follow').delete(this.authentication.authenticate, this.unfollow);
 
-    this.router
-      .route('/likes')
-      .post(this.authentication.authenticate, this.like);
-    this.router
-      .route('/likes')
-      .delete(this.authentication.authenticate, this.unlike);
+    this.router.route('/likes').post(this.authentication.authenticate, this.like);
+    this.router.route('/likes').delete(this.authentication.authenticate, this.unlike);
     return this.router;
+  }
+
+  async viewUsers(req, res, next) {
+    const userCursor = await this.service.selectUsers();
+
+    userCursor.on('data', (user) => {
+      res.write(JSON.stringify(user));
+    });
+
+    userCursor.on('end', () => {
+      res.end('user stream finished');
+    });
   }
 
   async viewUserByUsername(req, res, next) {
@@ -85,10 +82,10 @@ class Controller {
 
   async createUser(req, res, next) {
     try {
-      const user = await this.service.selectUser({ email: req.body.email });
+      /*       const user = await this.service.selectUser({ email: req.body.email });
       if (user) {
         next({ status: 409, message: 'user exist already' });
-      }
+      } */
       // req.body.password = passwordToHash(req.body.password);
       const newUser = await this.service.insertUser({
         ...req.body,
@@ -183,9 +180,7 @@ class Controller {
         });
       }
       const user = await this.service.selectUser({ _id: req.user.id });
-      if (
-        user.following.findIndex((f) => f.toString() === req.body.userId) > -1
-      ) {
+      if (user.following.findIndex((f) => f.toString() === req.body.userId) > -1) {
         return next({
           status: httpStatus.CONFLICT,
           message: 'you followed already',
@@ -199,9 +194,7 @@ class Controller {
         followedUser.follower.push(new ObjectId(req.user.id));
         await user.save();
         await followedUser.save();
-        return res
-          .status(httpStatus.OK)
-          .send({ message: 'followed successfully' });
+        return res.status(httpStatus.OK).send({ message: 'followed successfully' });
       }
       return next({ status: 404, message: 'user to follow not found' });
     } catch (error) {
@@ -220,9 +213,7 @@ class Controller {
       }
       const userIdToUnfollow = req.body.userId;
       const user = await this.service.selectUser({ _id: req.user.id });
-      const followIndex = user.following.findIndex(
-        (f) => f.toString() === userIdToUnfollow,
-      );
+      const followIndex = user.following.findIndex((f) => f.toString() === userIdToUnfollow);
       if (followIndex === -1) {
         return next({
           status: httpStatus.CONFLICT,
@@ -238,9 +229,7 @@ class Controller {
           (follower) => follower.id !== req.user.id,
         );
         await user.save();
-        return res
-          .status(httpStatus.OK)
-          .send({ message: 'unfollowed successfully' });
+        return res.status(httpStatus.OK).send({ message: 'unfollowed successfully' });
       }
       return next({ status: 404, message: 'user to unfollow not found' });
     } catch (error) {
@@ -276,9 +265,7 @@ class Controller {
     try {
       const post = await this.service.selectPost({ _id: postIdToUnlike });
       if (post) {
-        const likeIndex = post.likes.findIndex(
-          (l) => l.toString() === req.user.id,
-        );
+        const likeIndex = post.likes.findIndex((l) => l.toString() === req.user.id);
         if (likeIndex === -1) {
           return next({
             status: httpStatus.CONFLICT,

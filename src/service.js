@@ -7,11 +7,12 @@ class Service {
     return newUser.save();
   }
 
-  selectUsers = (where) => User.find({ ...where, deleted_at: null } || { deleted_at: null });
+  selectUsers = (where) =>
+    User.find({ ...where, deleted_at: null } || { deleted_at: null }).cursor({ batchSize: 10 });
 
   selectUser = (where) => User.findOne({ ...where, deleted_at: null } || { deleted_at: null });
 
-  insertPost = (data) => {
+  insertPost = async (data) => {
     const newPost = new Post(data);
     return newPost.save();
   };

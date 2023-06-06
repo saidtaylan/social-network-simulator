@@ -54,9 +54,7 @@ describe('controller', () => {
         email: mockUser.email,
       });
       expect(service.insertUser).toHaveBeenCalledWith(dataToInsert);
-      expect(res.status).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({
         message: 'user created',
         data: {

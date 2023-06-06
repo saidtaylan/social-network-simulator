@@ -1,26 +1,37 @@
 version: "3.9"
 services:
   server:
-    container_name: social-network-server
+    container_name: social-network-server-prod
     build: .
     restart: on-failure
     depends_on:
       - mongo
     networks:
       - social-network
-    ports:
-      - 3000:3000
   mongo:
     image: mongo:latest
-    container_name: social-network-mongo
+    container_name: social-network-mongo-prod
     networks:
       - social-network
     volumes:
-      - social-network:/etc/mongo
-
+      - social-network-mongo:/etc/mongo
+  
+  nginx:
+    image: nginx:latest
+    container_name: social-network-nginx-prod
+    depends_on:
+      - server
+      - mongo
+    networks:
+      - social-network
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - 8080:8080
+    
 networks:
   social-network:
     driver: bridge
 
 volumes:
-  social-network:
+  social-network-mongo:

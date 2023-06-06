@@ -1,13 +1,13 @@
 {
   "name": "social-media-network-simulator",
   "version": "1.0.0",
-  "main": "src/app.js",
+  "main": "src/server.js",
   "repository": "https://github.com/saidtaylan/social-network-simulator",
   "author": "saidtaylan",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/app.js",
-    "prod": "node src/app.js",
+    "dev": "nodemon src/server.js",
+    "prod": "node src/server.js",
     "lint": "eslint src",
     "test": "jest"
   },

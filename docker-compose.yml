@@ -4,6 +4,8 @@ services:
     container_name: social-network-server-prod
     build: .
     restart: on-failure
+    volumes:
+      - social-network-server:/app/static/
     depends_on:
       - mongo
     networks:
@@ -26,6 +28,7 @@ services:
       - social-network
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - social-network-server:/opt/static:ro
     ports:
       - 8080:8080
     
@@ -35,3 +38,4 @@ networks:
 
 volumes:
   social-network-mongo:
+  social-network-server:

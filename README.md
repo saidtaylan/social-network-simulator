@@ -13,4 +13,4 @@ _Projenin dökümantasyonu 'swagger' kullanılarak yapılmıştır. '/api-docs' 
 ```
 docker compose up
 ```
-Proje başladıktan sonra **3000** portundan ulaşabilirsiniz.
+Proje başladıktan sonra **8080** portundan ulaşabilirsiniz.

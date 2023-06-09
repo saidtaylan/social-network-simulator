@@ -82,10 +82,10 @@ class Controller {
 
   async createUser(req, res, next) {
     try {
-      /*       const user = await this.service.selectUser({ email: req.body.email });
+      const user = await this.service.selectUser({ email: req.body.email });
       if (user) {
         next({ status: 409, message: 'user exist already' });
-      } */
+      }
       // req.body.password = passwordToHash(req.body.password);
       const newUser = await this.service.insertUser({
         ...req.body,

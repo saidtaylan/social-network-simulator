@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema(
       },
     ],
     deleted_at: Date,
+    posts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'post',
+      },
+    ],
   },
   {
     timestamps: true,

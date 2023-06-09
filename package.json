@@ -13,10 +13,12 @@
   },
   "private": false,
   "dependencies": {
+    "@apollo/server": "^4.7.3",
     "axios": "^1.4.0",
     "crypto-js": "^4.1.1",
     "dotenv": "^16.1.3",
     "express": "^4.18.2",
+    "express-graphql": "^0.12.0",
     "graphql": "^16.6.0",
     "helmet": "^7.0.0",
     "http-status": "^1.6.2",

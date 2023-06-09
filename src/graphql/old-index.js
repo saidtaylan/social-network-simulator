@@ -1,6 +1,6 @@
 const { graphqlHTTP } = require('express-graphql');
-const schema = require('./schema');
-const Resolver = require('./resolver');
+const schema = require('./old-schema');
+const Resolver = require('./old-resolver');
 const Service = require('../service');
 
 const graphqlMiddleware = graphqlHTTP({

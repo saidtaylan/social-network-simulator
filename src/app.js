@@ -2,8 +2,10 @@ const express = require('express');
 const helmet = require('helmet');
 const config = require('./config/index');
 const { controller, middlewares } = require('./module');
-const graphqlMiddleware = require('./graphql');
-
+/*
+ * express-graphql used for learning and practice
+ * const graphqlMiddleware = require('./graphql/old-index');
+ */
 const app = express();
 
 config(app);
@@ -17,7 +19,10 @@ const startApp = (APP_PORT) => {
   app.listen(APP_PORT, () => {
     console.log('APP_PRTta başladı', APP_PORT);
     app.use('/api', controller.setRouter());
-    app.use('/graphql', graphqlMiddleware);
+    /*
+     * below code block is for express-graphql as well
+     * app.use('/graphql', graphqlMiddleware);
+     */
     app.use(middlewares.errorHandler.handle);
   });
 };

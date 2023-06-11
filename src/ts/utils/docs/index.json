@@ -1,0 +1,875 @@
+{
+  "/users": {
+    "post": {
+      "tags": [
+        "User"
+      ],
+      "summary": "Creates a new user",
+      "description": "Creates a new user",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "String",
+                  "example": "ahmetyilmaz"
+                },
+                "email": {
+                  "type": "String",
+                  "example": "ahmetyilmaz@yilmaz.com"
+                },
+                "password": {
+                  "type": "String",
+                  "example": "123"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user created"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "String",
+                        "example": "123456789abcdefghij01234"
+                      },
+                      "username": {
+                        "type": "String",
+                        "example": "ahmetyilmaz"
+                      },
+                      "email": {
+                        "type": "String",
+                        "example": "ahmetyilmaz@yilmaz.com"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user already exist"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/users/{username}": {
+    "get": {
+      "tags": [
+        "User"
+      ],
+      "summary": "get information about a spesific user by username",
+      "description": "get information about a spesific user by username",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "username",
+          "required": true,
+          "schema": {
+            "type": "String"
+          },
+          "description": "username of the user to get information"
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user created"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "username": {
+                        "type": "String",
+                        "example": "ahmetyilmaz"
+                      },
+                      "numberFollower": {
+                        "type": "Number",
+                        "example": 100
+                      },
+                      "numberFollowing": {
+                        "type": "Number",
+                        "example": 100
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user not exist"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/login": {
+    "post": {
+      "tags": [
+        "Authentication"
+      ],
+      "summary": "Logins to the system",
+      "description": "Logins to the system",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "String",
+                  "example": "ahmetyilmaz@yilmaz.com"
+                },
+                "password": {
+                  "type": "String",
+                  "example": "123"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "login successful"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "String",
+                        "example": "123456789abcdefghij01234"
+                      },
+                      "accessToken": {
+                        "type": "String",
+                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                        "minLength": 256
+                      },
+                      "refreshToken": {
+                        "type": "String",
+                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                        "minLength": 256
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "email or password wrong"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/posts": {
+    "post": {
+      "tags": [
+        "Post"
+      ],
+      "summary": "Creates a new post for the user",
+      "description": "Creates a new post for the user",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "Bearer {token}",
+          "schema": {
+            "format": "jwt"
+          },
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "String",
+                  "example": "the post content"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "the post created"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "postId": {
+                        "type": "String",
+                        "minLength": 24,
+                        "example": "123456789abcdefghij01234"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "delete": {
+      "tags": [
+        "Post"
+      ],
+      "summary": "Deletes a post",
+      "description": "Deletes a post as soft delete",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "Bearer {token}",
+          "schema": {
+            "format": "jwt"
+          },
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "postId": {
+                  "type": "String",
+                  "example": "123456789abcdefghij01234"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "the post deleted successfully"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "403": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "cannot delete a post you dont own"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "the post not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/feed": {
+    "get": {
+      "tags": [
+        "User"
+      ],
+      "summary": "Gets your all posts of your followers",
+      "description": "Gets your all posts of your followers",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "Bearer {token}",
+          "schema": {
+            "format": "jwt"
+          },
+          "required": true
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "username": {
+                        "type": "String",
+                        "example": "ahmetyilmaz"
+                      },
+                      "following": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "username": {
+                              "type": "string",
+                              "example": "mehmetyilmaz"
+                            },
+                            "posts": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "postId": {
+                                    "type": "String",
+                                    "example": "123456789abcdefghij01234"
+                                  },
+                                  "content": {
+                                    "type": "String",
+                                    "example": "the post content"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/follow": {
+    "post": {
+      "tags": [
+        "User"
+      ],
+      "summary": "Follows a user",
+      "description": "Follows a user",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "Bearer {token}",
+          "schema": {
+            "format": "jwt"
+          },
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "String",
+                  "example": "123456789abcdefghij01234"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "followed successfully"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "followed already"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user to follow not found"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "401": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "you may not follow yourself"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "delete": {
+      "tags": [
+        "User"
+      ],
+      "summary": "Unfollows a user",
+      "description": "Unfollows a user",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "Bearer {token}",
+          "schema": {
+            "format": "jwt"
+          },
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "String",
+                  "example": "123456789abcdefghij01234"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "unfollowed successfully"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "not followed already"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "user to unfollow not found"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "401": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "you may not unfollow yourself"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/likes": {
+    "post": {
+      "tags": [
+        "Post"
+      ],
+      "summary": "Likes a post",
+      "description": "Likes a post",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "Bearer {token}",
+          "schema": {
+            "format": "jwt"
+          },
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "postId": {
+                  "type": "String",
+                  "example": "123456789abcdefghij01234"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "followed successfully"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "liked already"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "post to like not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "delete": {
+      "tags": [
+        "User"
+      ],
+      "summary": "Unfollows a user",
+      "description": "Unfollows a user",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "Bearer {token}",
+          "schema": {
+            "format": "jwt"
+          },
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "String",
+                  "example": "123456789abcdefghij01234"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "unliked successfully"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "not liked already"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "post to unlike not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/retweets": {
+    "post": {
+      "tags": [
+        "Post"
+      ],
+      "summary": "Retweet a post",
+      "description": "Retweet a post",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "Bearer {token}",
+          "schema": {
+            "format": "jwt"
+          },
+          "required": true
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "postId": {
+                  "type": "String",
+                  "example": "123456789abcdefghij01234"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "String",
+                    "example": "the post created"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "retweetedPostId": {
+                        "type": "String",
+                        "minLength": 24,
+                        "example": "123456789abcdefghij01234"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

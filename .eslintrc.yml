@@ -20,3 +20,7 @@ rules:
   no-shadow: 0
   import/no-extraneous-dependencies: 0
   no-underscore-dangle: 0
+overrides:
+  - files:
+    - src/ts/.ts
+    - src/js/.js

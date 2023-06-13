@@ -13,23 +13,33 @@ export default class Service {
     return newUser.save();
   }
 
-  selectUsers = async (where?: { id?: string, email?: string }) => UserModel.find({ ...where, deleted_at: null } || { deleted_at: null }).cursor({ batchSize: 10 });
+  async selectUsers(where?: { _id?: string, email?: string }) {
+    return UserModel.find({ ...where, deleted_at: null } || { deleted_at: null }).cursor({ batchSize: 10 });
+  }
 
-  selectUser = async (where: { id: string }): Promise<IUser | null> => UserModel.findOne({ ...where, deleted_at: null } || { deleted_at: null })
-
-  insertPost = async (data: CreatePostDto): Promise<IPost> => {
+  async selectUser(where: { _id?: string, email?: string, username?: string }): Promise<IUser | null> {
+    return UserModel.findOne({ ...where, deleted_at: null } || { deleted_at: null })
+  }
+  async insertPost(data: CreatePostDto & { user: string, owner?: string }): Promise<IPost> {
     const newPost = new PostModel(data);
     return newPost.save();
-  };
+  }
 
-  selectPost = (where: { id: string }) => PostModel.findOne({ ...where, deleted_at: null } || { deleted_at: null });
+  async selectPost(where: { _id: string }) {
+    return PostModel.findOne({ ...where, deleted_at: null } || { deleted_at: null });
+  }
 
-  deletePost = async (postId: string) =>
-    PostModel.updateMany(
+  async selectPosts(ids: string[]) {
+    return PostModel.find({ _id: { $in: ids }, deleted_at: null } || { deleted_at: null });
+  }
+
+  async deletePost(postId: string) {
+    return PostModel.updateMany(
       { _id: postId, deleted_at: null },
       { deleted_at: new Date().getTime() },
       { new: true },
     );
+  }
 
   async feed(userId: string) {
     const user: HydratedDocument<IUser> | null = await UserModel.findById(userId, {

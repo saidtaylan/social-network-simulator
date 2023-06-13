@@ -274,7 +274,7 @@ class MainController {
         const retweetedPost = await this.service.insertPost({
           content: post.content,
           user: req.user?.id || '',
-          owner: post.user,
+          owner: post.user.toString(),
         });
         if (retweetedPost) {
           post.retweet.push(new Types.ObjectId(req.user?.id || ''));

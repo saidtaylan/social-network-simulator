@@ -1,6 +1,4 @@
-const { buildSchema } = require('graphql');
-
-const schema = buildSchema(`
+const schema = `#graphql
   type User {
     username: String!
     email: String!
@@ -33,6 +31,6 @@ const schema = buildSchema(`
     query: Query,
     mutation: Mutation
   }
-`);
+`;
 
-module.exports = schema;
+export default schema;

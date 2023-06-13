@@ -1,55 +1,21 @@
 import httpStatus from 'http-status'
-import { Document, HydratedDocument, Types } from 'mongoose'
-import { NextFunction, Router, Request, Response } from 'express'
+import { Types } from 'mongoose'
+import { NextFunction, Request, Response } from 'express'
 import type Service from './service'
 import Authentication from './middlewares/authentication'
-import { Transform, pipeline } from 'stream';
 import Validator from './middlewares/validation'
-import * as validations from './validations'
 import { passwordToHash, generateAccessToken, generateRefreshToken } from './utils/helpers'
 import * as Responses from './interfaces/responses'
-import { User } from './models/user'
-import { Post } from './models/post'
+import { IUser } from './models/user'
 import { IError } from './interfaces/error'
+import { Controller, Get, Post, Delete } from './decorators/http'
 
-export default class Controller {
-  private router!: Router;
+@Controller('/')
+class MainController {
   constructor(private readonly service: Service, private readonly authentication: Authentication, private readonly validator: Validator) { }
 
-  setRouter() {
-    this.router = Router();
-
-    this.router.route('/users').get(this.viewUsers.bind(this));
-
-    this.router
-      .route('/users')
-      .post(this.validator.validate(validations.createUser), this.createUser.bind(this));
-    this.router
-      .route('/users/:username')
-      .get(this.validator.validate(validations.getUser), this.viewUserByUsername.bind(this));
-    this.router.route('/login').post(this.validator.validate(validations.login), this.login.bind(this));
-
-    this.router
-      .route('/posts')
-      .post(
-        this.authentication.authenticate,
-        this.validator.validate(validations.createPost),
-        this.createPost.bind(this),
-      );
-
-    this.router.route('/posts').delete(this.authentication.authenticate, this.removePost.bind(this));
-    this.router.route('/retweet').post(this.authentication.authenticate, this.retweet.bind(this));
-
-    this.router.route('/feed').get(this.authentication.authenticate, this.feed.bind(this));
-    this.router.route('/follow').post(this.authentication.authenticate, this.follow.bind(this))
-    this.router.route('/follow').delete(this.authentication.authenticate, this.unfollow.bind(this));
-
-    this.router.route('/likes').post(this.authentication.authenticate, this.like.bind(this));
-    this.router.route('/likes').delete(this.authentication.authenticate, this.unlike.bind(this));
-    return this.router;
-  }
-
-  async viewUsers(req: Request, res: Response, next: NextFunction) {
+  @Get('users')
+  async viewUsers(req: Request, res: Response, next: NextFunction) { // eslint-disable-line @typescript-eslint/no-unused-vars
     const userCursor = await this.service.selectUsers({});
 
     userCursor.on('data', (user) => {
@@ -61,6 +27,7 @@ export default class Controller {
     });
   }
 
+  @Get('users/:username')
   async viewUserByUsername(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await this.service.selectUser({
@@ -78,10 +45,11 @@ export default class Controller {
       next({ status: httpStatus.NOT_FOUND, message: 'user not exist' });
     } catch (error) {
       console.error('VIEW USER BY USERNAME ERROR', error);
-      next({ ...error as Object as Object, message: 'the user could not view' });
+      next({ ...error as object, message: 'the user could not view' });
     }
   }
 
+  @Post('/users')
   async createUser(req: Request & { body: { email: string } }, res: Response, next: NextFunction) {
     try {
       const user = await this.service.selectUser({ email: req.body.email });
@@ -106,13 +74,14 @@ export default class Controller {
       }
     } catch (error) {
       console.error('CREATE USER ERROR', error);
-      next({ ...error as Object, message: 'the user could not create' });
+      next({ ...error as object, message: 'the user could not create' });
     }
   }
 
+  @Post('login')
   async login(req: Request, res: Response, next: NextFunction) {
     try {
-      const user: User | null = await this.service.selectUser({ email: req.body.email });
+      const user: IUser | null = await this.service.selectUser({ email: req.body.email });
       if (user && user.password === passwordToHash(req.body.password)) {
         return res.status(httpStatus.OK).send({
           message: 'login successful',
@@ -135,15 +104,16 @@ export default class Controller {
       });
     } catch (error) {
       console.error('LOGIN ERROR', error);
-      next({ ...error as Object, message: 'an error occured while loging in' });
+      next({ ...error as object, message: 'an error occured while loging in' });
     }
   }
 
+  @Post('posts')
   async createPost(req: Request, res: Response, next: NextFunction) {
     try {
       const newPost = await this.service.insertPost({
         ...req.body,
-        user: req.user!.id,
+        user: req.user?.id || '',
       });
       console.log('newPost', newPost)
       if (newPost) {
@@ -154,13 +124,14 @@ export default class Controller {
       }
     } catch (error) {
       console.error('POST CREATE ERROR', error);
-      next({ ...error as Object, message: 'the post could not create' });
+      next({ ...error as object, message: 'the post could not create' });
     }
   }
 
+  @Get('feed')
   async feed(req: Request, res: Response, next: NextFunction) {
     try {
-      const posts: Responses.Feed | IError = await this.service.feed(req.user!.id);
+      const posts: Responses.Feed | IError = await this.service.feed(req.user?.id || '');
       if ('status' in posts) {
         return res.status(httpStatus.OK).send({
           data: posts,
@@ -170,22 +141,23 @@ export default class Controller {
       next(posts);
     } catch (error) {
       console.error('FEED ERROR', error);
-      next({ ...error as Object, message: 'an error occured fetching the feed' });
+      next({ ...error as object, message: 'an error occured fetching the feed' });
     }
   }
 
+  @Post('follow')
   async follow(req: Request, res: Response, next: NextFunction) {
     try {
-      if (req.user!.id === req.body.userId) {
+      if (req.user?.id || '' === req.body.userId) {
         return next({
           status: httpStatus.UNAUTHORIZED,
           message: 'you may not follow yourself',
         });
       }
       console.log('this', this)
-      const user: User | null = await this.service.selectUser({ _id: req.user!.id });
+      const user: IUser | null = await this.service.selectUser({ _id: req.user?.id || '' });
       if (user) {
-        if (user.following.findIndex((f: any) => f.toString() === req.body.userId) > -1) {
+        if (user.following.findIndex((f: Types.ObjectId) => f.toString() === req.body.userId) > -1) {
           return next({
             status: httpStatus.CONFLICT,
             message: 'you followed already',
@@ -196,7 +168,7 @@ export default class Controller {
         });
         if (followedUser) {
           user.following.push(new Types.ObjectId(req.body.userId));
-          followedUser.follower.push(new Types.ObjectId(req.user!.id));
+          followedUser.follower.push(new Types.ObjectId(req.user?.id || ''));
           await user.save();
           await followedUser.save();
           return res.status(httpStatus.OK).send({ message: 'followed successfully' });
@@ -205,20 +177,21 @@ export default class Controller {
       return next({ status: 404, message: 'user to follow not found' });
     } catch (error) {
       console.error('USER FOLLOW ERROR', error);
-      next({ ...error as Object, message: 'the user could not follow' });
+      next({ ...error as object, message: 'the user could not follow' });
     }
   }
 
+  @Post('unfollow')
   async unfollow(req: Request, res: Response, next: NextFunction) {
     try {
-      if (req.user!.id === req.body.userId) {
+      if (req.user?.id || '' === req.body.userId) {
         return next({
           status: httpStatus.UNAUTHORIZED,
           message: 'you may not unfollow yourself',
         });
       }
       const userIdToUnfollow = req.body.userId;
-      const user: User | null = await this.service.selectUser({ _id: req.user!.id });
+      const user: IUser | null = await this.service.selectUser({ _id: req.user?.id || '' });
       if (user) {
         const followIndex = user.following.findIndex((f: Types.ObjectId) => f.toString() === userIdToUnfollow);
         if (followIndex === -1) {
@@ -233,7 +206,7 @@ export default class Controller {
         if (unfollowedUser) {
           user.following.splice(followIndex);
           unfollowedUser.follower = unfollowedUser.follower.filter(
-            (follower: Types.ObjectId) => follower.toString() !== req.user!.id,
+            (follower: Types.ObjectId) => follower.toString() !== req.user?.id || '',
           );
           await user.save();
           return res.status(httpStatus.OK).send({ message: 'unfollowed successfully' });
@@ -242,38 +215,40 @@ export default class Controller {
       return next({ status: 404, message: 'user to unfollow not found' });
     } catch (error) {
       console.error('USER UNFOLLOW ERROR', error);
-      return next({ ...error as Object, message: 'the user could not unfollow' });
+      return next({ ...error as object, message: 'the user could not unfollow' });
     }
   }
 
+  @Post('like')
   async like(req: Request, res: Response, next: NextFunction) {
     const postIdToLike = req.body.postId;
     try {
       const post = await this.service.selectPost({ _id: postIdToLike });
       if (post) {
-        if (post.likes.findIndex((l) => l.toString() === req.user!.id) > -1) {
+        if (post.likes.findIndex((l) => l.toString() === req.user?.id || '') > -1) {
           return next({
             status: httpStatus.CONFLICT,
             message: 'liked already',
           });
         }
-        post.likes.push(new Types.ObjectId(req.user!.id));
+        post.likes.push(new Types.ObjectId(req.user?.id || ''));
         await post.save();
         return res.status(200).send({ message: 'liked successfully' });
       }
       return next({ status: 404, message: 'post to like not found' });
     } catch (error) {
       console.error('POST LIKE ERROR', error);
-      next({ ...error as Object, message: 'the post could not like' });
+      next({ ...error as object, message: 'the post could not like' });
     }
   }
 
+  @Post('unlike')
   async unlike(req: Request, res: Response, next: NextFunction) {
     const postIdToUnlike = req.body.postId;
     try {
       const post = await this.service.selectPost({ _id: postIdToUnlike });
       if (post) {
-        const likeIndex = post.likes.findIndex((l) => l.toString() === req.user!.id);
+        const likeIndex = post.likes.findIndex((l) => l.toString() === req.user?.id || '');
         if (likeIndex === -1) {
           return next({
             status: httpStatus.CONFLICT,
@@ -287,21 +262,22 @@ export default class Controller {
       return next({ status: 404, message: 'post to unlike not found' });
     } catch (error) {
       console.error('POST UNLIKE ERROR', error);
-      next({ ...error as Object, message: 'the post could not unlike' });
+      next({ ...error as object, message: 'the post could not unlike' });
     }
   }
 
+  @Post('retweet')
   async retweet(req: Request, res: Response, next: NextFunction) {
     try {
       const post = await this.service.selectPost({ _id: req.body.postId });
       if (post) {
         const retweetedPost = await this.service.insertPost({
           content: post.content,
-          user: req.user!.id,
+          user: req.user?.id || '',
           owner: post.user,
         });
         if (retweetedPost) {
-          post.retweet.push(new Types.ObjectId(req.user!.id));
+          post.retweet.push(new Types.ObjectId(req.user?.id || ''));
           await post.save();
         }
         return res.status(httpStatus.CREATED).send({
@@ -314,16 +290,17 @@ export default class Controller {
       return next({ status: 404, message: 'the post to retweet not found' });
     } catch (error) {
       console.error('POST RETWEET ERROR', error);
-      next({ ...error as Object, message: 'the post could not retweet' });
+      next({ ...error as object, message: 'the post could not retweet' });
     }
   }
 
+  @Delete('posts')
   async removePost(req: Request, res: Response, next: NextFunction) {
     try {
       const post = await this.service.selectPost({ _id: req.body.postId });
       if (post) {
         // you may not delete you dont own
-        if (post.user.toString() === req.user!.id) {
+        if (post.user.toString() === req.user?.id || '') {
           const deletedPost = await this.service.deletePost(req.body.postId);
           if (deletedPost.modifiedCount > 0) {
             return res.status(httpStatus.OK).send({
@@ -339,7 +316,8 @@ export default class Controller {
       return next({ status: 404, message: 'the post not found' });
     } catch (error) {
       console.error('POST DELETE ERROR', error);
-      return next({ ...error as Object, message: 'the post could not delete' });
+      return next({ ...error as object, message: 'the post could not delete' });
     }
   }
 }
+export default MainController

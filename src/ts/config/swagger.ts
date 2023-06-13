@@ -34,6 +34,6 @@ export default (app: Express) => {
     apis: ['../routes.js'],
   };
 
-  const specs: Object = swaggerJsdoc(options);
+  const specs: object = swaggerJsdoc(options);
   app.use('/rest/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 };

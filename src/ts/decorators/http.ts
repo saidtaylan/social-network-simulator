@@ -14,19 +14,19 @@ export function Get(_path?: string) {
 
 export function Post(_path?: string) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        return HttpMethod(target, 'get', propertyKey, _path)
+        return HttpMethod(target, 'post', propertyKey, _path)
     }
 }
 
 export function Put(_path?: string) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        return HttpMethod(target, 'get', propertyKey, _path)
+        return HttpMethod(target, 'put', propertyKey, _path)
     }
 }
 
 export function Delete(_path?: string) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        return HttpMethod(target, 'get', propertyKey, _path)
+        return HttpMethod(target, 'delete', propertyKey, _path)
     }
 }
 
